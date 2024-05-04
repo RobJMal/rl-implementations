@@ -5,7 +5,7 @@ Repo where I practice implementing different RL algorithms
 ## 1. Rendering 
 To resolve these problems, refer to the Rendering section in the [DM Control repo on GitHub](https://github.com/google-deepmind/dm_control)
 
-Another common problem is that the MuJoCo Python bindings need to be set. Make sure you 
+Another common problem is that the MuJoCo Python bindings need to be set. Make sure you import the `os` library and then set the graphics library environment BEFORE importing `dm_control`. 
 ```python
 import os 
 
