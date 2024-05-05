@@ -25,6 +25,7 @@ class Sarsa():
         self.test_episodes = []
         self.test_frequency = 1000
 
+
     def run(self):
         '''
         Runs SARSA. 
@@ -49,7 +50,6 @@ class Sarsa():
             self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
             if episode % self.test_frequency == 0:
-                print(f"Evaluating episode {episode}")
                 total_rewards = 0
 
                 for _ in range(self.test_episodes_range):
@@ -62,6 +62,8 @@ class Sarsa():
                 
                 self.rewards.append(total_rewards / self.test_episodes_range)
                 self.test_episodes.append(episode)
+
+                print(f"Evaluating episode {episode} | Average Rewards: {total_rewards/self.test_episodes_range}")
 
         print(f"SARSA training COMPLETED")
 
