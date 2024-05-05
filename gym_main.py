@@ -6,6 +6,9 @@ import time
 from sarsa import Sarsa
 
 env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=True, render_mode='rgb_array')
+seed_value = 42
+env.reset(seed=seed_value)
+env.action_space.seed(seed_value)
 
 sarsa = Sarsa(env=env)
 sarsa.run()
