@@ -20,13 +20,13 @@ class Sarsa():
         self.epsilon_min = 0.01
         self.discount_factor = 0.95
         self.learning_rate = 0.1
-        self.total_episodes = 20000
+        self.total_episodes = 10000
 
         # For evaluation and plotting 
         self.rewards = []
-        self.test_episodes_range = 100 
+        self.test_episodes_range = 50 
         self.test_episodes = []
-        self.test_frequency = 1000
+        self.test_frequency = 100
 
 
     def run(self):

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import time
 
-from sarsa import Sarsa
-from qlearning import QLearning
+from algos.sarsa import Sarsa
+from algos.qlearning import QLearning
 
 if __name__ == '__main__':
     env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=True, render_mode='rgb_array')
@@ -12,12 +12,12 @@ if __name__ == '__main__':
     env.reset(seed=seed_value)
     env.action_space.seed(seed_value)
 
-    # # Running SARSA 
-    # sarsa = Sarsa(env=env)
-    # sarsa.run()
-    # sarsa.plot_results(filename='SARSA_test-0.png')
-    # sarsa.record_policy(output_directory="media", video_filename="sarsa_policy-0.mp4")
-    # sarsa.plot_q_values_map(filename="sarsa_policy-0.png")
+    # Running SARSA 
+    sarsa = Sarsa(env=env)
+    sarsa.run()
+    sarsa.plot_results(filename='SARSA_test-0.png')
+    sarsa.record_policy(output_directory="media", video_filename="sarsa_policy-0.mp4")
+    sarsa.plot_q_values_map(filename="sarsa_policy-0.png")
 
     # Running Q-Learning
     qlarning = QLearning(env=env)
