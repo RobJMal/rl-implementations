@@ -24,6 +24,9 @@ class Sarsa():
         self.test_frequency = 1000
 
     def run(self):
+        '''
+        Runs SARSA. 
+        '''
         print(f"Running SARSA training...")
 
         reward = 0
@@ -60,6 +63,28 @@ class Sarsa():
 
         print(f"SARSA training COMPLETED")
 
+
+    def plot_results(self, filename=None):
+        '''
+        Plots results of the episodes vs the average rewards. 
+        '''
+        fig, ax = plt.subplots()
+        ax.plot(self.test_episodes, self.rewards)
+        ax.set_title('Episodes vs average rewards')
+        ax.set_xlabel('Episode')
+        ax.set_ylabel('Average reward')
+        ax.grid(True)
+
+        if filename:
+            output_directory = 'media'
+            os.makedirs(output_directory, exist_ok=True)
+
+            file_path = os.path.join(output_directory, filename)
+            plt.savefig(file_path)
+
+        plt.show()
+
+
     def _choose_action(self, state):
         '''
         Chooses an action using epsilon-greedy policy 
@@ -83,22 +108,4 @@ class Sarsa():
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
 
 
-    def plot_results(self, filename=None):
-        '''
-        Plots results of the episodes vs the average rewards. 
-        '''
-        fig, ax = plt.subplots()
-        ax.plot(self.test_episodes, self.rewards)
-        ax.set_title('Episodes vs average rewards')
-        ax.set_xlabel('Episode')
-        ax.set_ylabel('Average reward')
-        ax.grid(True)
-
-        if filename:
-            output_directory = 'media'
-            os.makedirs(output_directory, exist_ok=True)
-
-            file_path = os.path.join(output_directory, filename)
-            plt.savefig(file_path)
-
-        plt.show()
+    
