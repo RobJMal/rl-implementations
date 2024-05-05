@@ -25,8 +25,9 @@ class Sarsa():
             state_current = self.env.reset()[0]
             action_current = self._choose_action(state_current)
             truncated = False   # Keeps track if episode goes over timelimit 
+            terminated = False
 
-            while not truncated:
+            while (not terminated) or (not truncated):
                 state_next, reward, terminated, truncated, info = self.env.step(action_current)
                 action_next = self._choose_action(state_next)
 
@@ -36,9 +37,6 @@ class Sarsa():
                 action_current = action_next
 
                 reward += 1
-
-                if terminated:
-                    break
             
             print(f"Completed episode {episode}")
             print(self.Q)
