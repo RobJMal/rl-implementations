@@ -16,15 +16,17 @@ class Sarsa():
         self.total_episodes = 10000
         self.max_steps = 90    # Number of steps allowed in environment 
 
+        self.rewards = []
+
     def run(self):
         reward = 0
 
         for episode in range(self.total_episodes):
-            t = 0
             state_current = self.env.reset()[0]
             action_current = self._choose_action(state_current)
+            truncated = False   # Keeps track if episode goes over timelimit 
 
-            while t < self.max_steps:
+            while not truncated:
                 state_next, reward, terminated, truncated, info = self.env.step(action_current)
                 action_next = self._choose_action(state_next)
 
@@ -33,7 +35,6 @@ class Sarsa():
                 state_current = state_next
                 action_current = action_next
 
-                t += 1
                 reward += 1
 
                 if terminated:
