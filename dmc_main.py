@@ -46,6 +46,5 @@ if __name__ == '__main__':
         observations.append(copy.deepcopy(time_step.observation))
         ticks.append(env.physics.data.time)
 
-    breakpoint()
     output_policy_video_filename = f'media/{dmc_domain_name}-{dmc_task_name}_result.mp4'
     save_video(frames=frames, filename=output_policy_video_filename, framerate=30)
