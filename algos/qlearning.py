@@ -6,7 +6,7 @@ import numpy as np
 from moviepy.editor import ImageSequenceClip
 import seaborn as sns
 
-class Sarsa():
+class QLearning():
     def __init__(self, env):
         self.env = env 
         self.map_size = 4
@@ -15,47 +15,51 @@ class Sarsa():
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Hyperparameters 
-        self.epsilon = 0.95
-        self.epsilon_decay = 0.999  # Encourage exploration in beginning and exploitation towards the end 
-        self.epsilon_min = 0.01
-        self.discount_factor = 0.95
+        self.epsilon = 0.99
+        self.epsilon_decay = 0.99  # Encourage exploration in beginning and exploitation towards the end 
+        self.epsilon_min = 0.1
+        self.discount_factor = 0.9
         self.learning_rate = 0.1
-        self.total_episodes = 20000
+        self.total_episodes = 10000
 
         # For evaluation and plotting 
         self.rewards = []
-        self.test_episodes_range = 100 
+        self.test_episodes_range = 50 
         self.test_episodes = []
-        self.test_frequency = 1000
+        self.test_frequency = 100
 
 
     def run(self):
         '''
-        Runs SARSA. 
+        Runs Q-Learning. 
         '''
-        print(f"Running SARSA training...")
+        print(f"Running Q-Learning training...")
 
         reward = 0
         for episode in range(self.total_episodes):
             state_current = self.env.reset()[0]
-            action_current = self._choose_action(state_current)
             truncated = False   # Keeps track if episode goes over timelimit 
             terminated = False
 
             while not(terminated or truncated):
-                state_next, reward, terminated, truncated, info = self.env.step(action_current)
-                action_next = self._choose_action(state_next)
-                self._update_Q_value(state_current, action_current, state_next, action_next, reward)
+                action_current = self._choose_action(state_current)
+                state_next, reward, terminated, truncated, _ = self.env.step(action_current)
+
+                # Crux of Q-Learning Algorithm 
+                Q_current = self.Q[state_current, action_current]
+                target = reward + self.discount_factor * np.max(self.Q[state_next])
+                self.Q[state_current, action_current] = Q_current + self.learning_rate*(target - Q_current)
+
+                self._update_Q_value(state_current, action_current, state_next, reward)
 
                 state_current = state_next
-                action_current = action_next
 
             self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
             if episode % self.test_frequency == 0:
                 self._evaluate_policy(episode)
 
-        print(f"SARSA training COMPLETED")
+        print(f"Q-Learning training COMPLETED")
 
 
     def plot_results(self, filename=None):
@@ -79,7 +83,7 @@ class Sarsa():
         plt.show()
 
 
-    def record_policy(self, output_directory="media", video_filename="sarsa_policy-0.mp4"):
+    def record_policy(self, output_directory="media", video_filename="q-learning_policy-0.mp4"):
         '''
         Saves the policy execution as a video
         '''
@@ -102,7 +106,7 @@ class Sarsa():
         print(f"Video saved to {output_directory}/{video_filename}")
 
 
-    def plot_q_values_map(self, filename="sarsa_policy-0.png"):
+    def plot_q_values_map(self, filename="q-learning_policy-0.png"):
         '''
         Plots the policy and the last frame as a heatmap of Q-values over the grid.
 
@@ -164,13 +168,13 @@ class Sarsa():
         return action
 
 
-    def _update_Q_value(self, state, action, state_next, action_next, reward):
+    def _update_Q_value(self, state_current, action_current, state_next, reward):
         '''
-        Updates the Q-value function 
+        Updates the Q-value function based on the Q-Learning algorithm. 
         '''
-        Q_current = self.Q[state, action]
-        target = reward + self.discount_factor*self.Q[state_next, action_next]
-        self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
+        Q_current = self.Q[state_current, action_current]
+        target = reward + self.discount_factor * np.max(self.Q[state_next])
+        self.Q[state_current, action_current] = Q_current + self.learning_rate*(target - Q_current)
 
 
     def _evaluate_policy(self, episode):
