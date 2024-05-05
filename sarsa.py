@@ -1,3 +1,4 @@
+import os
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -82,7 +83,7 @@ class Sarsa():
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
 
 
-    def plot_results(self):
+    def plot_results(self, filename=None):
         '''
         Plots results of the episodes vs the average rewards. 
         '''
@@ -90,6 +91,14 @@ class Sarsa():
         ax.plot(self.test_episodes, self.rewards)
         ax.set_title('Episodes vs average rewards')
         ax.set_xlabel('Episode')
-        _ = ax.set_ylabel('Average reward')
+        ax.set_ylabel('Average reward')
+        ax.grid(True)
+
+        if filename:
+            output_directory = 'media'
+            os.makedirs(output_directory, exist_ok=True)
+
+            file_path = os.path.join(output_directory, filename)
+            plt.savefig(file_path)
 
         plt.show()
