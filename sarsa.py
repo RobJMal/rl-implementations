@@ -134,7 +134,6 @@ class Sarsa():
                     max_q_value = max_q_values[i, j]
                     qtable_directions[i, j] = f"{arrow}\n{max_q_value:6.2f}"
 
-            
             return max_q_values, qtable_directions
 
         # Prepare data for the heatmap
@@ -151,7 +150,7 @@ class Sarsa():
             linecolor="black",
             xticklabels=[],
             yticklabels=[],
-            annot_kws={"fontsize": "large"},
+            annot_kws={"fontsize": "xx-large"},
         ).set(title="Learned Q-values\nArrows represent best action")
 
         # Save the plot
