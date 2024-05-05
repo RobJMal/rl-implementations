@@ -9,5 +9,6 @@ env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=True)
 
 sarsa = Sarsa(env=env)
 sarsa.run()
-    
+sarsa.plot_results()
+
 env.close()

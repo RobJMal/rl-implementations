@@ -82,7 +82,10 @@ class Sarsa():
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
 
 
-    def _plot_results(self):
+    def plot_results(self):
+        '''
+        Plots results of the episodes vs the average rewards. 
+        '''
         fig, ax = plt.subplots()
         ax.plot(self.test_episodes, self.rewards)
         ax.set_title('Episodes vs average rewards')
