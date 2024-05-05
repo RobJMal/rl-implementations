@@ -9,12 +9,13 @@ class Sarsa():
         self.num_states = self.env.observation_space.n 
         self.Q = np.zeros((self.num_states, self.num_actions))
 
-        # Parameters
-        self.epsilon = 0.7
+        # Hyperparameters 
+        self.epsilon = 0.95
+        self.epsilon_decay = 0.999  # Encourage exploration in beginning and exploitation towards the end 
+        self.epsilon_min = 0.01
         self.discount_factor = 0.95
-        self.learning_rate = 0.9
+        self.learning_rate = 0.1
         self.total_episodes = 20000
-        self.max_steps = 90    # Number of steps allowed in environment 
 
         self.rewards = []
         self.test_episodes_range = 100 
@@ -38,6 +39,8 @@ class Sarsa():
 
                 state_current = state_next
                 action_current = action_next
+
+            self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
             if episode % self.test_frequency == 0:
                 print(f"Evaluating episode {episode}")
