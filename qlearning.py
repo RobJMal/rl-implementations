@@ -15,18 +15,18 @@ class QLearning():
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Hyperparameters 
-        self.epsilon = 0.95
+        self.epsilon = 0.99
         self.epsilon_decay = 0.99  # Encourage exploration in beginning and exploitation towards the end 
         self.epsilon_min = 0.1
         self.discount_factor = 0.9
-        self.learning_rate = 0.3
-        self.total_episodes = 25000
+        self.learning_rate = 0.1
+        self.total_episodes = 10000
 
         # For evaluation and plotting 
         self.rewards = []
-        self.test_episodes_range = 100 
+        self.test_episodes_range = 50 
         self.test_episodes = []
-        self.test_frequency = 500
+        self.test_frequency = 100
 
 
     def run(self):
