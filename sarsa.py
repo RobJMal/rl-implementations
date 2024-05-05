@@ -1,5 +1,6 @@
 import os
 import gymnasium as gym
+from gymnasium.wrappers import RecordVideo
 import matplotlib.pyplot as plt
 import numpy as np 
 
@@ -83,6 +84,23 @@ class Sarsa():
             plt.savefig(file_path)
 
         plt.show()
+
+
+    def record_policy(self, output_directory="media", video_filename="sarsa_policy-0.mp4"):
+        '''
+        Saves the policy execution as a video
+        '''
+        # os.makedirs(output_directory, exist_ok=True)
+        env_with_video = RecordVideo(self.env, output_directory, episode_trigger=lambda ep:True)
+        state = env_with_video.reset()[0]
+        terminated, truncated = False, False
+
+        while not (terminated or truncated):
+            action = np.argmax(self.Q[state, :])
+            state, _, terminated, truncated, _ = env_with_video.step(action)
+
+        env_with_video.close()
+        print(f"Video saved to {output_directory}/{video_filename}")
 
 
     def _choose_action(self, state):
