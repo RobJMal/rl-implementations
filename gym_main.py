@@ -15,5 +15,6 @@ if __name__ == '__main__':
     sarsa.run()
     sarsa.plot_results(filename='SARSA_test-0.png')
     sarsa.record_policy(output_directory="media", video_filename="sarsa_policy-0.mp4")
+    sarsa.plot_q_values_map(filename="sarsa_policy-0.png")
 
     env.close()

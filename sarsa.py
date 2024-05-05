@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np 
 
 from moviepy.editor import ImageSequenceClip
+import seaborn as sns
 
 class Sarsa():
     def __init__(self, env):
         self.env = env 
+        self.map_size = 4
         self.num_actions = self.env.action_space.n
         self.num_states = self.env.observation_space.n 
         self.Q = np.zeros((self.num_states, self.num_actions))
@@ -135,4 +137,57 @@ class Sarsa():
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
 
 
-    
+    def plot_q_values_map(self, filename="sarsa_policy-0.png"):
+        '''
+        Plots the policy and the last frame as a heatmap of Q-values over the grid.
+        '''
+
+        def qtable_directions_map(qtable, map_size):
+            # Define action symbols corresponding to (left, down, right, up)
+            action_symbols = ['←', '↓', '→', '↑']
+
+            qtable_val_max = np.max(qtable, axis=1).reshape(map_size, map_size)
+            best_actions = np.argmax(qtable, axis=1).reshape(map_size, map_size)
+
+            qtable_directions = np.empty(best_actions.shape, dtype=str)
+            for i in range(map_size):
+                for j in range(map_size):
+                    qtable_directions[i, j] = action_symbols[best_actions[i, j]]
+
+            return qtable_val_max, qtable_directions
+
+        # Get the best Q-values and directions
+        qtable_val_max, qtable_directions = qtable_directions_map(self.Q, self.map_size)
+
+        # Plot the last rendered frame
+        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
+        ax[0].imshow(self.env.render())
+        ax[0].axis("off")
+        ax[0].set_title("Last frame")
+
+        # Plot the Q-value heatmap with arrows
+        sns.heatmap(
+            qtable_val_max,
+            annot=qtable_directions,
+            fmt="",
+            ax=ax[1],
+            cmap=sns.color_palette("Blues", as_cmap=True),
+            linewidths=0.7,
+            linecolor="black",
+            xticklabels=[],
+            yticklabels=[],
+            annot_kws={"fontsize": "xx-large"},
+        ).set(title="Learned Q-values\nArrows represent best action")
+
+        for _, spine in ax[1].spines.items():
+            spine.set_visible(True)
+            spine.set_linewidth(0.7)
+            spine.set_color("black")
+
+        # Ensure the output directory exists
+        output_dir = 'media'
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save the plot
+        fig.savefig(os.path.join(output_dir, filename), bbox_inches="tight")
+        plt.show()    
