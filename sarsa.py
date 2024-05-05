@@ -23,7 +23,7 @@ class Sarsa():
         self.test_frequency = 1000
 
     def run(self):
-        print(f"Running SARSA algorithm...")
+        print(f"Running SARSA training...")
 
         reward = 0
         for episode in range(self.total_episodes):
@@ -57,7 +57,7 @@ class Sarsa():
                 self.rewards.append(total_rewards / self.test_episodes_range)
                 self.test_episodes.append(episode)
 
-        self._plot_results()
+        print(f"SARSA training COMPLETED")
 
     def _choose_action(self, state):
         '''
