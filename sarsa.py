@@ -114,6 +114,53 @@ class Sarsa():
         print(f"Video saved to {output_directory}/{video_filename}")
 
 
+    def plot_q_values_map(self, filename="sarsa_policy-0.png"):
+        '''
+        Plots the policy and the last frame as a heatmap of Q-values over the grid.
+        '''
+
+        def generate_qtable_with_arrows_and_values(qtable, map_size):
+            action_symbols = ['←', '↓', '→', '↑']
+            qtable_directions = np.empty((map_size, map_size), dtype=object)
+
+            # Prepare Q-values and best actions
+            best_actions = np.argmax(qtable, axis=1).reshape(map_size, map_size)
+            max_q_values = np.max(qtable, axis=1).reshape(map_size, map_size)
+
+            # Annotate each square with the arrow and Q-values
+            for i in range(map_size):
+                for j in range(map_size):
+                    arrow = action_symbols[best_actions[i, j]]
+                    max_q_value = max_q_values[i, j]
+                    qtable_directions[i, j] = f"{arrow}\n{max_q_value:6.2f}"
+
+            
+            return max_q_values, qtable_directions
+
+        # Prepare data for the heatmap
+        max_q_values, qtable_directions = generate_qtable_with_arrows_and_values(self.Q, self.map_size)
+
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(8, 8))
+        sns.heatmap(
+            max_q_values,
+            annot=qtable_directions,
+            fmt="",
+            cmap=sns.color_palette("Blues", as_cmap=True),
+            linewidths=0.7,
+            linecolor="black",
+            xticklabels=[],
+            yticklabels=[],
+            annot_kws={"fontsize": "large"},
+        ).set(title="Learned Q-values\nArrows represent best action")
+
+        # Save the plot
+        output_dir = 'media'
+        os.makedirs(output_dir, exist_ok=True)
+        fig.savefig(os.path.join(output_dir, filename), bbox_inches="tight")
+        plt.show()    
+
+
     def _choose_action(self, state):
         '''
         Chooses an action using epsilon-greedy policy 
@@ -136,58 +183,3 @@ class Sarsa():
         target = reward + self.discount_factor*self.Q[state_next, action_next]
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
 
-
-    def plot_q_values_map(self, filename="sarsa_policy-0.png"):
-        '''
-        Plots the policy and the last frame as a heatmap of Q-values over the grid.
-        '''
-
-        def qtable_directions_map(qtable, map_size):
-            # Define action symbols corresponding to (left, down, right, up)
-            action_symbols = ['←', '↓', '→', '↑']
-
-            qtable_val_max = np.max(qtable, axis=1).reshape(map_size, map_size)
-            best_actions = np.argmax(qtable, axis=1).reshape(map_size, map_size)
-
-            qtable_directions = np.empty(best_actions.shape, dtype=str)
-            for i in range(map_size):
-                for j in range(map_size):
-                    qtable_directions[i, j] = action_symbols[best_actions[i, j]]
-
-            return qtable_val_max, qtable_directions
-
-        # Get the best Q-values and directions
-        qtable_val_max, qtable_directions = qtable_directions_map(self.Q, self.map_size)
-
-        # Plot the last rendered frame
-        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
-        ax[0].imshow(self.env.render())
-        ax[0].axis("off")
-        ax[0].set_title("Last frame")
-
-        # Plot the Q-value heatmap with arrows
-        sns.heatmap(
-            qtable_val_max,
-            annot=qtable_directions,
-            fmt="",
-            ax=ax[1],
-            cmap=sns.color_palette("Blues", as_cmap=True),
-            linewidths=0.7,
-            linecolor="black",
-            xticklabels=[],
-            yticklabels=[],
-            annot_kws={"fontsize": "xx-large"},
-        ).set(title="Learned Q-values\nArrows represent best action")
-
-        for _, spine in ax[1].spines.items():
-            spine.set_visible(True)
-            spine.set_linewidth(0.7)
-            spine.set_color("black")
-
-        # Ensure the output directory exists
-        output_dir = 'media'
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Save the plot
-        fig.savefig(os.path.join(output_dir, filename), bbox_inches="tight")
-        plt.show()    
