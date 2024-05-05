@@ -22,6 +22,7 @@ class Sarsa():
         self.learning_rate = 0.1
         self.total_episodes = 20000
 
+        # For evaluation and plotting 
         self.rewards = []
         self.test_episodes_range = 100 
         self.test_episodes = []
@@ -52,20 +53,7 @@ class Sarsa():
             self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
             if episode % self.test_frequency == 0:
-                total_rewards = 0
-
-                for _ in range(self.test_episodes_range):
-                    state = self.env.reset()[0]
-                    terminated, truncated = False, False
-                    while not(terminated or truncated):
-                        action = np.argmax(self.Q[state])
-                        state, reward, terminated, truncated, _ = self.env.step(action)
-                        total_rewards += reward
-                
-                self.rewards.append(total_rewards / self.test_episodes_range)
-                self.test_episodes.append(episode)
-
-                print(f"Evaluating episode {episode} | Average Rewards: {total_rewards/self.test_episodes_range}")
+                self._evaluate_policy(episode)
 
         print(f"SARSA training COMPLETED")
 
@@ -183,4 +171,25 @@ class Sarsa():
         Q_current = self.Q[state, action]
         target = reward + self.discount_factor*self.Q[state_next, action_next]
         self.Q[state, action] = Q_current + self.learning_rate*(target - Q_current)
+
+
+    def _evaluate_policy(self, episode):
+        '''
+        Evaluates the policy based on a certain frequency and averaging among certain
+        amount of episodes. 
+        '''
+        total_rewards = 0
+
+        for _ in range(self.test_episodes_range):
+            state = self.env.reset()[0]
+            terminated, truncated = False, False
+            while not(terminated or truncated):
+                action = np.argmax(self.Q[state])
+                state, reward, terminated, truncated, _ = self.env.step(action)
+                total_rewards += reward
+        
+        self.rewards.append(total_rewards / self.test_episodes_range)
+        self.test_episodes.append(episode)
+
+        print(f"Evaluating episode {episode} | Average Rewards: {total_rewards/self.test_episodes_range}")
 
