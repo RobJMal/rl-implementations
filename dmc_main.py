@@ -34,6 +34,7 @@ if __name__ == '__main__':
 
     while env.physics.data.time < duration: 
         action = random_state.uniform(spec.minimum, spec.maximum, spec.shape)
+        action = 0.1
         time_step = env.step(action)
 
         # Frames of the agent in the environment (for visualization purposes)

@@ -10,7 +10,7 @@ def save_video(frames, filename='media/output.mp4', framerate=30):
     fig = plt.figure(figsize=(frames[0].shape[1] / 100, frames[0].shape[0] / 100), dpi=100)
     plt.axis('off')
 
-    print("Creading video...")
+    print("Creating video...")
     ims = [[plt.imshow(frame, animated=True)] for frame in frames]
     ani = animation.ArtistAnimation(fig, ims, interval=1000/framerate, blit=True, repeat_delay=1000)
     ani.save(filename, writer='ffmpeg', fps=framerate)
