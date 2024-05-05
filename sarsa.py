@@ -1,8 +1,9 @@
 import os
 import gymnasium as gym
-from gymnasium.wrappers import RecordVideo
 import matplotlib.pyplot as plt
 import numpy as np 
+
+from moviepy.editor import ImageSequenceClip
 
 class Sarsa():
     def __init__(self, env):
@@ -90,16 +91,22 @@ class Sarsa():
         '''
         Saves the policy execution as a video
         '''
-        # os.makedirs(output_directory, exist_ok=True)
-        env_with_video = RecordVideo(self.env, output_directory, episode_trigger=lambda ep:True)
-        state = env_with_video.reset()[0]
+        os.makedirs(output_directory, exist_ok=True)
+
+        frames = []
+        state = self.env.reset()[0]
         terminated, truncated = False, False
 
         while not (terminated or truncated):
-            action = np.argmax(self.Q[state, :])
-            state, _, terminated, truncated, _ = env_with_video.step(action)
+            frames.append(self.env.render())
 
-        env_with_video.close()
+            action = np.argmax(self.Q[state, :])
+            state, _, terminated, truncated, _ = self.env.step(action)
+        frames.append(self.env.render())    # Render the last frame before end of episode
+
+        clip = ImageSequenceClip(frames, fps=10)
+        video_path = os.path.join(output_directory, video_filename)
+        clip.write_videofile(video_path)
         print(f"Video saved to {output_directory}/{video_filename}")
 
 
