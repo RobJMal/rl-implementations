@@ -117,6 +117,8 @@ class Sarsa():
     def plot_q_values_map(self, filename="sarsa_policy-0.png"):
         '''
         Plots the policy and the last frame as a heatmap of Q-values over the grid.
+
+        Source based off of: https://gymnasium.farama.org/tutorials/training_agents/FrozenLake_tuto/#sphx-glr-tutorials-training-agents-frozenlake-tuto-py
         '''
 
         def generate_qtable_with_arrows_and_values(qtable, map_size):
