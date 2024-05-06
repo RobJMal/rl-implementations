@@ -50,6 +50,94 @@ class DQN():
         self.test_episodes = []
         self.test_frequency = 100
 
+
+    def run(self) -> None:
+        '''
+        Runs the learning of the agent. 
+        '''
+        for episode in range(self.total_episodes):
+            state_current = self.env.reset()
+            terminated, truncated = False, False
+
+            while not(terminated or truncated):
+                action_current = self._choose_action(state_current)
+                state_next, reward, terminated, truncated, _ = self.env.step(action_current)
+                reward = torch.tensor([reward], device=self.device)
+
+            if terminated:
+                state_next = None
+            else:
+                state_next = torch.tensor(state_next, dtype=torch.float32, device=self.device).unsqueeze(0)
+                
+            self.replay_memory.push(Transition(state_current, action_current, state_next, reward))
+
+            state_current = state_next
+            self._optimize_model()
+            self._soft_update_target_network_weights()
+
+
+    def _choose_action(self, state):
+        '''
+        Chooses an action using epsilon-greedy policy 
+        '''
+        action = 0
+
+        if np.random.uniform(0, 1) < self.epsilon:
+            action = self.env.action_space.sample()
+        else:
+            action = np.argmax(self.Q[state, :])
+
+        return action
+
+
+    def _optimize_model(self) -> None:
+        '''
+        Performs optimization on the model 
+        '''
+        if len(self.replay_memory) < self.batch_size:
+            return 
+        
+        transitions = self.replay_memory.sample(self.batch_size)
+        batch = Transition(*zip(*transitions))
+
+        # Filtering out the termination state so model doesn't learn future reward
+        # calculations and for stability
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, 
+                                                batch.state_next)), device=self.device, dtype=torch.bool)
+        non_final_next_states = torch.cat([s for s in batch.state_next if s is not None])
+        state_batch = torch.cat(batch.state)
+        action_batch = torch.cat(batch.action)
+        reward_batch = torch.cat(batch.reward)
+
+        Q_values = self.policy_net(state_batch).gather(1, action_batch)
+
+        next_state_values = torch.zeros(self.batch_size, device=self.device)
+        with torch.no_grad():
+            next_state_values[non_final_mask] = self.target_model(non_final_next_states).max(1).values
+
+        Q_values_expected = (next_state_values * self.discount_factor) + reward_batch
+
+        loss_function = nn.SmoothL1Loss()   # Huber loss 
+        loss = loss_function(Q_values, Q_values_expected.unsqueeze(1))
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_value_(self.policy_model.parameters(), 100)
+        self.optimizer.step()
+
+    
+    def _soft_update_target_network_weights(self) -> None:
+        '''
+        Performs a soft update of the target network's weights
+        '''
+        target_model_state_dict = self.target_model.state_dict()
+        policy_model_state_dict = self.policy_model.state_dict()
+
+        for key in policy_model_state_dict:
+            target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
+        self.target_model.load_state_dict(target_model_state_dict)
+
+
 # Represents transition in environment 
 Transition = namedtuple('Transition', ('state', 'action', 'state_next', 'reward'))
 
@@ -74,3 +162,19 @@ class ReplayMemory():
         Returns the length of the memory_buffer
         '''
         return len(self.memory_buffer)
+    
+
+class DQNModel(nn.Module):
+    '''
+    Constructs model used for DQN agent for Q-function approximation. 
+    '''
+    def __init__(self, num_states, num_actions) -> None:
+        super(DQNModel, self).__init()
+        self.fc_layer1 = nn.Linear(num_states, 128)
+        self.fc_layer2 = nn.Linear(128, 128)
+        self.fc_layer3 = nn.Linear(128, num_actions)
+
+    def forward(self, x):
+        x = F.relu(self.fc_layer1(x))
+        x = F.relu(self.fc_layer2(x))
+        return self.fc_layer3(x)
