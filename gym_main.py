@@ -26,4 +26,13 @@ if __name__ == '__main__':
     qlarning.record_policy(output_directory="media", video_filename="qlearning_policy-0.mp4")
     qlarning.plot_q_values_map(filename="qlearning_policy-0.png")
 
+    # Running continous learning 
+    continuous_env = gym.make("CartPole-v1", render_mode='rgb_array')
+    seed_value = 42
+    continuous_env.reset(seed=seed_value)
+    continuous_env.action_space.seed(seed_value)
+
+    # Running DQN
+
     env.close()
+    continuous_env.close()
