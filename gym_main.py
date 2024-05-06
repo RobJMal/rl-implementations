@@ -12,12 +12,12 @@ if __name__ == '__main__':
     env.reset(seed=seed_value)
     env.action_space.seed(seed_value)
 
-    # # Running SARSA 
-    # sarsa = Sarsa(env=env)
-    # sarsa.run()
-    # sarsa.plot_results(filename='SARSA_test-0.png')
-    # sarsa.record_policy(output_directory="media", video_filename="sarsa_policy-0.mp4")
-    # sarsa.plot_q_values_map(filename="sarsa_policy-0.png")
+    # Running SARSA 
+    sarsa = Sarsa(env=env)
+    sarsa.run()
+    sarsa.plot_results(filename='SARSA_test-0.png')
+    sarsa.record_policy(output_directory="media", video_filename="sarsa_policy-0.mp4")
+    sarsa.plot_q_values_map(filename="sarsa_policy-0.png")
 
     # Running Q-Learning
     qlarning = QLearning(env=env)
