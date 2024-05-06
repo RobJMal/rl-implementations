@@ -8,13 +8,18 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import random
 from collections import namedtuple, deque
-import torch 
+
+import torch
+import torch.nn as nn 
+import torch.nn.functional as F
+import torch.optim as optim
 
 from moviepy.editor import ImageSequenceClip
 import seaborn as sns
 
 class DQN():
-    def __init__(self, env):
+    def __init__(self, env, device):
+        self.device = device
         self.env = env 
         self.num_actions = self.env.action_space.n
         self.num_states = self.env.observation_space.n 
@@ -26,8 +31,18 @@ class DQN():
         self.epsilon_min = 0.01
         self.discount_factor = 0.99
         self.learning_rate = 0.001
-        self.total_episodes = 10000
+        self.total_episodes = 1000
         self.batch_size = 32            # Size of experiences we sample to train DNN
+        self.replay_memory_max_capacity = 5000
+
+        self.tau = 0.005   # Update rate of the target model 
+        self.replay_memory = ReplayMemory(max_capacity=self.replay_memory_max_capacity)
+        self.policy_model = DQNModel(num_states=self.num_states, 
+                                     num_actions=self.num_actions)
+        self.target_model = DQNModel(num_states=self.num_states,
+                                     num_actions=self.num_actions)
+        self.target_model.load_state_dict(self.policy_model.state_dict())   # Synchronize the weights of the networks
+        self.optimizer = optim.Adam(self.policy_model.parameters(), lr=self.learning_rate)
 
         # For evaluation and plotting 
         self.rewards = []
