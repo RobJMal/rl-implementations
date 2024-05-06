@@ -15,10 +15,11 @@ class QLearning():
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Hyperparameters 
-        self.epsilon = 0.99
-        self.epsilon_decay = 0.99  # Encourage exploration in beginning and exploitation towards the end 
-        self.epsilon_min = 0.1
-        self.discount_factor = 0.9
+        # Modified and obtained from: https://towardsdatascience.com/q-learning-algorithm-from-explanation-to-implementation-cdbeda2ea187
+        self.epsilon = 1
+        self.epsilon_decay = 0.999  # Encourage exploration in beginning and exploitation towards the end 
+        self.epsilon_min = 0.01
+        self.discount_factor = 0.99
         self.learning_rate = 0.1
         self.total_episodes = 10000
 
