@@ -4,10 +4,12 @@ Main source: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning
 
 import os
 import gymnasium as gym
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np 
 import random
 from collections import namedtuple, deque
+from itertools import count
 
 import torch
 import torch.nn as nn 
@@ -16,6 +18,12 @@ import torch.optim as optim
 
 from moviepy.editor import ImageSequenceClip
 import seaborn as sns
+
+is_ipython = 'inline' in matplotlib.get_backend()
+if is_ipython:
+    from IPython import display
+
+plt.ion()
 
 class DQN():
     def __init__(self, env, device):
@@ -51,6 +59,8 @@ class DQN():
         self.test_episodes = []
         self.test_frequency = 100
 
+        self.episode_durations = []
+
     def run(self) -> None:
         '''
         Runs the learning of the agent. 
@@ -60,7 +70,7 @@ class DQN():
             state_current = self._convert_to_tensor(state_current)
             terminated, truncated = False, False
 
-            while not(terminated or truncated):
+            for t in count(): 
                 action_current = self._choose_action(state_current)
                 state_next, reward, terminated, truncated, _ = self.env.step(action_current.item())
                 reward = self._convert_to_tensor(reward)
@@ -77,10 +87,17 @@ class DQN():
                 self._optimize_model()
                 self._soft_update_target_network_weights()
 
+                if (terminated or truncated):
+                    self.episode_durations.append(t+1)
+                    self._plot_durations(show_result=False)
+                    break
+
             # Reduce the epsilon after every episode
             self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
-            print(f"Finished episode {episode}")
+        self._plot_durations(show_result=True)
+        plt.ioff()
+        plt.show()
 
     def _choose_action(self, state) -> torch.tensor:
         '''
@@ -150,6 +167,32 @@ class DQN():
         if not isinstance(data, torch.Tensor):
             data = torch.tensor([data], device=self.device)
         return data
+    
+    def _plot_durations(self, show_result=False):
+        plt.figure(1)
+        durations_t = torch.tensor(self.episode_durations, dtype=torch.float)
+        if show_result:
+            plt.title('Result')
+        else:
+            plt.clf()
+            plt.title('Training...')
+        plt.xlabel('Episode')
+        plt.ylabel('Duration')
+        plt.plot(durations_t.numpy())
+
+        # Take 100 episode averages and plot them too
+        if len(durations_t) >= 100:
+            means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
+            means = torch.cat((torch.zeros(99), means))
+            plt.plot(means.numpy())
+
+        plt.pause(0.001)  # pause a bit so that plots are updated
+        if is_ipython:
+            if not show_result:
+                display.display(plt.gcf())
+                display.clear_output(wait=True)
+            else:
+                display.display(plt.gcf())
 
 # Represents transition in environment 
 Transition = namedtuple('Transition', ('state', 'action', 'state_next', 'reward'))
