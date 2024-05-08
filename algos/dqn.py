@@ -51,7 +51,6 @@ class DQN():
         self.test_episodes = []
         self.test_frequency = 100
 
-
     def run(self) -> None:
         '''
         Runs the learning of the agent. 
@@ -83,7 +82,6 @@ class DQN():
 
             print(f"Finished episode {episode}")
 
-
     def _choose_action(self, state) -> torch.tensor:
         '''
         Chooses an action using epsilon-greedy policy 
@@ -95,7 +93,6 @@ class DQN():
                 # breakpoint()
                 action = self.policy_model(state).max(1).indices.view(1, 1)
                 return action
-
 
     def _optimize_model(self) -> None:
         '''
@@ -135,7 +132,6 @@ class DQN():
         torch.nn.utils.clip_grad_value_(self.policy_model.parameters(), 100)
         self.optimizer.step()
 
-    
     def _soft_update_target_network_weights(self) -> None:
         '''
         Performs a soft update of the target network's weights
@@ -147,13 +143,12 @@ class DQN():
             target_model_state_dict[key] = policy_model_state_dict[key]*self.tau + target_model_state_dict[key]*(1-self.tau)
         self.target_model.load_state_dict(target_model_state_dict)
 
-
     def _convert_to_tensor(self, data) -> torch.Tensor:
         '''
         Converts the value and puts it in a Pytorch Tensor. 
         '''
         if not isinstance(data, torch.Tensor):
-            data = torch.tensor([data], device=self.device, dtype=torch.float32)
+            data = torch.tensor([data], device=self.device)
         return data
 
 # Represents transition in environment 
@@ -168,14 +163,8 @@ class ReplayMemory():
         '''
         Adds a new transition into the memory buffer 
         '''
-        # print("State before conversion: ", state)
-        # state = torch.tensor(state, device=self.device, dtype=torch.float32).unsqueeze(0) if not isinstance(state, torch.Tensor) else state.to(self.device)
-        # action = torch.tensor([action], device=self.device, dtype=torch.long) if not isinstance(action, torch.Tensor) else action.to(self.device)
-        # if state_next is not None:
-        #     state_next = torch.tensor(state_next, device=self.device, dtype=torch.float32).unsqueeze(0) if not isinstance(state_next, torch.Tensor) else state_next.to(self.device)
-        # reward = torch.tensor([reward], device=self.device, dtype=torch.float) if not isinstance(reward, torch.Tensor) else reward.to(self.device)
         self.memory_buffer.append(Transition(state, action, state_next, reward))
-    
+
     def sample(self, batch_size):
         '''
         Returns a number of samples from buffer based on the batch_size
